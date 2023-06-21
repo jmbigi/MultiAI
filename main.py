@@ -1,3 +1,4 @@
+import numpy as np
 from model.generate_code import generate_python_code
 from model.reverse_engineer import reverse_engineer_terminal_output
 from training.train_model import train_model
