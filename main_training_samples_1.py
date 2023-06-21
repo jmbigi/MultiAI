@@ -1,4 +1,4 @@
-# main.py
+# main_training_samples_1.py
 
 import numpy as np
 from model.generate_code import generate_python_code
@@ -8,13 +8,11 @@ from training.train_model import train_model
 if __name__ == "__main__":
     # Example usage of the functions
     
-    # Generate Python code from a natural language instruction
     natural_language_instruction = "print the number 20 in the terminal"
     python_code = generate_python_code(natural_language_instruction)
     print(f"Natural language instruction: {natural_language_instruction}")
     print(f"Generated Python code: {python_code}")
 
-    # Reverse-engineer natural language instruction and Python code from terminal output
     terminal_output = "20"
     natural_language_instruction, python_code = reverse_engineer_terminal_output(terminal_output)
     if natural_language_instruction and python_code:
@@ -24,10 +22,15 @@ if __name__ == "__main__":
     else:
         print("Unable to reverse-engineer terminal output")
 
-    # Request user input for each of the nodes
-    new_natural_language_instruction = input("Please enter a new natural language instruction: ")
-    new_python_code = input("Please enter the corresponding Python code: ")
-    new_terminal_output = input("Please enter the corresponding terminal output: ")
-
-    # Train the model using the user inputs
-    train_model(new_natural_language_instruction, new_python_code, new_terminal_output)
+    # Generate example training samples
+    training_data = [
+        ("print the number 10 in the terminal", "print(10)", "10"),
+        ("calculate the square root of 16", "sqrt(16)", "4"),
+        ("check if a number is even", "is_even(7)", "False"),
+        ("convert temperature from Celsius to Fahrenheit", "celsius_to_fahrenheit(25)", "77"),
+        # Add more examples here
+    ]
+    
+    # Train the model using the generated training samples
+    for data in training_data:
+        train_model(*data)
