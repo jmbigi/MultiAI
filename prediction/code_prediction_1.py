@@ -1,8 +1,8 @@
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import LSTM, Dense
-from tensorflow.keras.callbacks import LambdaCallback
+from tensorflow.keras.layers import LSTM, Dense, Dropout
+from tensorflow.keras.callbacks import LambdaCallback, ModelCheckpoint
 
 # Load and process the dataset
 data = open('prediction/python_code_001.txt').read().lower()
@@ -28,14 +28,13 @@ for i, sentence in enumerate(sentences):
 # Define the model
 model = Sequential()
 model.add(LSTM(128, input_shape=(maxlen, len(chars))))
+model.add(Dropout(0.2))  # Add dropout layer to avoid overfitting
 model.add(Dense(len(chars), activation='softmax'))
 
 optimizer = tf.keras.optimizers.RMSprop(learning_rate=0.01)
-
-# Here's the change: adding run_eagerly=True
 model.compile(loss='categorical_crossentropy', optimizer=optimizer, run_eagerly=True)
 
-# Helper function to generate text after each epoch
+# Callback to generate text after each epoch
 def on_epoch_end(epoch, _):
     print(f'\nGenerating text after epoch: {epoch}')
 
@@ -63,5 +62,13 @@ def on_epoch_end(epoch, _):
 
 generate_callback = LambdaCallback(on_epoch_end=on_epoch_end)
 
+# Callback for saving the model after each epoch
+checkpoint_path = "training/cp.ckpt"
+checkpoint_callback = ModelCheckpoint(
+    filepath=checkpoint_path, 
+    verbose=1, 
+    save_weights_only=True,
+    period=5)
+
 # Train the model
-model.fit(X, y, batch_size=128, epochs=20, callbacks=[generate_callback])
+model.fit(X, y, batch_size=128, epochs=20, callbacks=[generate_callback, checkpoint_callback])
