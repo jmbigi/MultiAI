@@ -51,4 +51,11 @@ if __name__ == "__main__":
         print("Failed to reverse-engineer terminal output")
 ```
 
+**Current version:**
+
+Version: 2.0.
+Implementation of learning.
+
+**Regards:**
+
 Thanks for your collaboration.
