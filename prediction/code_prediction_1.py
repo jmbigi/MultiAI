@@ -55,6 +55,7 @@ model.compile(loss='categorical_crossentropy', optimizer=optimizer, run_eagerly=
 
 # Define callback function to generate text after each epoch
 def on_epoch_end(epoch, _):
+    print()
     print(f'\nGenerating text after epoch: {epoch}')
 
     # Select a random starting point for generation
@@ -66,7 +67,7 @@ def on_epoch_end(epoch, _):
     print(f'Generating with seed: "{sentence}"')
 
     # Generate characters
-    for i in range(400):
+    for i in range(80):
         x_pred = np.zeros((1, maxlen, len(chars)))
         for t, char in enumerate(sentence):
             x_pred[0, t, char_indices[char]] = 1.
@@ -80,9 +81,10 @@ def on_epoch_end(epoch, _):
         generated += next_char
 
     print(f'Generated: "{generated}"')
+    print()
 
 # Instantiate the LambdaCallback for generation
-generate_callback = LambdaCallback(on_epoch_end=on_epoch_end)
+generate_callback = LambdaCallback(on_epoch_end=on_epoch_end, save_freq=5)
 
 # Set up checkpoint path for saving weights
 checkpoint_path = "training/cp.ckpt"
