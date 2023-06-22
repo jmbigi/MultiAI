@@ -3,13 +3,24 @@ import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense, Dropout
 from tensorflow.keras.callbacks import LambdaCallback, ModelCheckpoint
+import glob
 
-# Load and process the dataset
-data = open('prediction/python_code_001.txt').read().lower()
+directory = 'prediction/pythons/*.py'
+
+# Read and process the files
+data = ""
+for file_path in glob.glob(directory):
+    with open(file_path) as file:
+        data += file.read().lower()
+
+# Create a sorted list of the unique characters in the data
 chars = sorted(list(set(data)))
+
+# Create dictionaries to map characters to indices and vice versa
 char_indices = dict((c, i) for i, c in enumerate(chars))
 indices_char = dict((i, c) for i, c in enumerate(chars))
 
+# Prepare the dataset
 maxlen = 40
 step = 3
 sentences = []
@@ -18,6 +29,7 @@ for i in range(0, len(data) - maxlen, step):
     sentences.append(data[i: i + maxlen])
     next_chars.append(data[i + maxlen])
 
+# One-hot encode the data
 X = np.zeros((len(sentences), maxlen, len(chars)), dtype=np.bool_)
 y = np.zeros((len(sentences), len(chars)), dtype=np.bool_)
 for i, sentence in enumerate(sentences):
@@ -27,17 +39,25 @@ for i, sentence in enumerate(sentences):
 
 # Define the model
 model = Sequential()
+
+# Add LSTM layer with 128 units
 model.add(LSTM(128, input_shape=(maxlen, len(chars))))
-model.add(Dropout(0.2))  # Add dropout layer to avoid overfitting
+
+# Add dropout layer to prevent overfitting
+model.add(Dropout(0.2))
+
+# Add output layer
 model.add(Dense(len(chars), activation='softmax'))
 
+# Compile the model
 optimizer = tf.keras.optimizers.RMSprop(learning_rate=0.01)
 model.compile(loss='categorical_crossentropy', optimizer=optimizer, run_eagerly=True)
 
-# Callback to generate text after each epoch
+# Define callback function to generate text after each epoch
 def on_epoch_end(epoch, _):
     print(f'\nGenerating text after epoch: {epoch}')
 
+    # Select a random starting point for generation
     start_index = np.random.randint(0, len(data) - maxlen - 1)
     generated = ''
     sentence = data[start_index: start_index + maxlen]
@@ -45,6 +65,7 @@ def on_epoch_end(epoch, _):
 
     print(f'Generating with seed: "{sentence}"')
 
+    # Generate characters
     for i in range(400):
         x_pred = np.zeros((1, maxlen, len(chars)))
         for t, char in enumerate(sentence):
@@ -60,10 +81,13 @@ def on_epoch_end(epoch, _):
 
     print(f'Generated: "{generated}"')
 
+# Instantiate the LambdaCallback for generation
 generate_callback = LambdaCallback(on_epoch_end=on_epoch_end)
 
-# Callback for saving the model after each epoch
+# Set up checkpoint path for saving weights
 checkpoint_path = "training/cp.ckpt"
+
+# Create ModelCheckpoint callback
 checkpoint_callback = ModelCheckpoint(
     filepath=checkpoint_path, 
     verbose=1, 

@@ -1,4 +1,4 @@
-# This is a simple Python program
+# Print Hello, World!
 print("Hello, World!")
 
 # Define a function
