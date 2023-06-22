@@ -64,3 +64,28 @@ model.fit([encoder_input_data, decoder_input_data], decoder_target_data, batch_s
 
 # Save the trained model
 model.save('code_translation_model.h5')
+
+print(char_indices)
+
+# Examples
+test_examples = [
+    "# Find the maximum element in a list",
+    "# Calculate the factorial of a number",
+    "# Reverse a string",
+    "# Compute the average of a list",
+    "# Sort a list in ascending order",
+]
+
+for example in test_examples:
+    input_sequence = [char_indices.get(char, 0) for char in example]  # Use char_indices.get() with a default value of 0
+    input_data = np.zeros((1, len(input_sequence), len(all_chars)), dtype=np.float32)
+    for t, char_index in enumerate(input_sequence):
+        input_data[0, t, char_index] = 1.0
+    
+    output_sequence = model.predict(input_data)[0]
+    predicted_code = ''.join(indices_char[np.argmax(char_probs)] for char_probs in output_sequence)
+    
+    print("Example:")
+    print("Input:", example)
+    print("Predicted Code:", predicted_code)
+    print()
